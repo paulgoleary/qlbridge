@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -114,6 +115,15 @@ func (m *JsonSource) loadTable() error {
 	return nil
 }
 func (m *JsonSource) Open(connInfo string) (schema.Conn, error) {
+	
+	if m.r != nil {
+		// already opened ...?
+		if connInfo != m.table {
+			return nil, fmt.Errorf("invalid - source is already open but connection info is different")
+		}
+		return m, nil
+	}
+
 	if connInfo == "stdio" || connInfo == "stdin" {
 		connInfo = "/dev/stdin"
 	}
