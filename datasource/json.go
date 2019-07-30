@@ -85,7 +85,9 @@ func NewJsonSource(table string, rc io.ReadCloser, exit <-chan bool, lh FileLine
 		js.lh = js.jsonDefaultLine
 	}
 
-	//m.loadTable()
+	// TODO: test !!!
+	js.loadTable()
+
 	return js, nil
 }
 
