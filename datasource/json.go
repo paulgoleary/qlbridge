@@ -52,7 +52,7 @@ type JsonSource struct {
 
 // NewJsonSource reader assumes we are getting NEW LINE delimted json file
 // - optionally may be gzipped
-func NewJsonSource(table string, rc io.ReadCloser, exit <-chan bool, lh FileLineHandler) (*JsonSource, error) {
+func NewJsonSource(table string, rc io.ReadCloser, exit <-chan bool, lh FileLineHandler, fieldDefs []*schema.Field) (*JsonSource, error) {
 
 	js := &JsonSource{
 		table:  table,
@@ -87,7 +87,7 @@ func NewJsonSource(table string, rc io.ReadCloser, exit <-chan bool, lh FileLine
 	}
 
 	// TODO: test !!!
-	js.loadTable()
+	js.loadTable(fieldDefs)
 
 	return js, nil
 }
@@ -103,19 +103,28 @@ func (m *JsonSource) Table(tableName string) (*schema.Table, error) {
 	}
 	return nil, schema.ErrNotFound
 }
-func (m *JsonSource) loadTable() error {
+func (m *JsonSource) loadTable(fieldDefs []*schema.Field) error {
 	tbl := schema.NewTable(strings.ToLower(m.table))
-	columns := m.Columns()
-	for i := range columns {
-		columns[i] = strings.ToLower(columns[i])
-		tbl.AddField(schema.NewFieldBase(columns[i], value.StringType, 64, "string"))
+	if fieldDefs != nil {
+		m.columns = make([]string, len(fieldDefs))
+		for i := range m.columns {
+			m.columns[i] = strings.ToLower(fieldDefs[i].Name)
+			tbl.AddField(fieldDefs[i])
+		}
+		tbl.SetColumns(m.columns)
+	} else {
+		columns := m.Columns()
+		for i := range columns {
+			columns[i] = strings.ToLower(columns[i])
+			tbl.AddField(schema.NewFieldBase(columns[i], value.StringType, 64, "string"))
+		}
+		tbl.SetColumns(columns)
 	}
-	tbl.SetColumns(columns)
 	m.tbl = tbl
 	return nil
 }
 func (m *JsonSource) Open(connInfo string) (schema.Conn, error) {
-	
+
 	if m.r != nil {
 		// already opened ...?
 		if connInfo != m.table {
@@ -132,7 +141,7 @@ func (m *JsonSource) Open(connInfo string) (schema.Conn, error) {
 		return nil, err
 	}
 	exit := make(<-chan bool, 1)
-	return NewJsonSource(connInfo, f, exit, m.lhSpec)
+	return NewJsonSource(connInfo, f, exit, m.lhSpec, nil)
 }
 
 func (m *JsonSource) Close() error {
