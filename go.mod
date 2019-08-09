@@ -25,4 +25,4 @@ require (
 	google.golang.org/api v0.7.0
 )
 
-replace github.com/araddon/qlbridge => github.com/paulgoleary/qlbridge v0.0.0-20190614144613-77bcb31a8923
+replace github.com/araddon/qlbridge => github.com/paulgoleary/qlbridge v0.0.0-20190809183752-71207bcec993

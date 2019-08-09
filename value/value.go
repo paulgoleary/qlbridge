@@ -502,9 +502,9 @@ func (m IntValue) Float() float64 { return float64(m.v) }
 func (m IntValue) Int() int64     { return m.v }
 
 func (m IntValue) Compare(value NumericValue) int {
-	if m.Float() < value.Float() {
+	if m.Int() < value.Int() {
 		return -1
-	} else if m.Float() > value.Float() {
+	} else if m.Int() > value.Int() {
 		return 1
 	} else {
 		return 0
@@ -957,9 +957,9 @@ func (m TimeValue) Int() int64                   { return m.v.In(time.UTC).UnixN
 func (m TimeValue) Time() time.Time              { return m.v }
 
 func (m TimeValue) Compare(value NumericValue) int {
-	if m.Float() < value.Float() {
+	if m.Int() < value.Int() {
 		return -1
-	} else if m.Float() > value.Float() {
+	} else if m.Int() > value.Int() {
 		return 1
 	} else {
 		return 0
