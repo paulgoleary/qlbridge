@@ -177,7 +177,7 @@ func (m *OrderMessages) Less(i, j int) bool {
 
 		if cmp < 0 {
 			return !m.invert[ki]
-		} else {
+		} else if cmp > 0 {
 			return m.invert[ki]
 		}
 	}
