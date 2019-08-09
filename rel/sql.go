@@ -744,8 +744,10 @@ func (m *Column) IsLiteralOrFunc() bool {
 }
 
 func (m *Column) Asc() bool {
-	return strings.ToLower(m.Order) == "asc"
+	// 'Order' is empty when not specified and default should be ASC
+	return !(strings.ToLower(m.Order) == "desc")
 }
+
 func (m *Column) Equal(c *Column) bool {
 	if m == nil && c == nil {
 		return true
