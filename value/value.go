@@ -161,6 +161,7 @@ type (
 	NumericValue interface {
 		Float() float64
 		Int() int64
+		Compare(value NumericValue) int
 	}
 	// Slices can always return a []Value representation and is meant to be used
 	// when iterating over all items in a non-scalar value. Maps return their keys
@@ -178,6 +179,8 @@ type (
 		Get(key string) (Value, bool)
 	}
 )
+
+type StringCompare struct {}
 
 type (
 	NumberValue struct {
@@ -462,6 +465,16 @@ func (m NumberValue) MarshalJSON() ([]byte, error) { return marshalFloat(float64
 func (m NumberValue) ToString() string             { return fmt.Sprintf("%v", m.v) }
 func (m NumberValue) Float() float64               { return m.v }
 func (m NumberValue) Int() int64                   { return int64(m.v) }
+func (m NumberValue) Compare(value NumericValue) int {
+	if m.Float() < value.Float() {
+		return -1
+	} else if m.Float() > value.Float() {
+		return 1
+	} else {
+		return 0
+	}
+}
+
 
 func NewIntValue(v int64) IntValue {
 	return IntValue{v: v}
@@ -487,6 +500,16 @@ func (m IntValue) ToString() string {
 }
 func (m IntValue) Float() float64 { return float64(m.v) }
 func (m IntValue) Int() int64     { return m.v }
+
+func (m IntValue) Compare(value NumericValue) int {
+	if m.Float() < value.Float() {
+		return -1
+	} else if m.Float() > value.Float() {
+		return 1
+	} else {
+		return 0
+	}
+}
 
 func NewBoolValue(v bool) BoolValue {
 	if v {
@@ -932,6 +955,16 @@ func (m TimeValue) ToString() string             { return strconv.FormatInt(m.In
 func (m TimeValue) Float() float64               { return float64(m.v.In(time.UTC).UnixNano() / 1e6) }
 func (m TimeValue) Int() int64                   { return m.v.In(time.UTC).UnixNano() / 1e6 }
 func (m TimeValue) Time() time.Time              { return m.v }
+
+func (m TimeValue) Compare(value NumericValue) int {
+	if m.Float() < value.Float() {
+		return -1
+	} else if m.Float() > value.Float() {
+		return 1
+	} else {
+		return 0
+	}
+}
 
 func NewErrorValue(v error) ErrorValue {
 	return ErrorValue{v: v}

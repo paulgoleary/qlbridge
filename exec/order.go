@@ -2,7 +2,9 @@ package exec
 
 import (
 	"fmt"
+	"github.com/araddon/qlbridge/value"
 	"sort"
+	"strings"
 	"time"
 
 	u "github.com/araddon/gou"
@@ -102,12 +104,12 @@ msgReadLoop:
 
 				// We are going to use VM Engine to create a value for each statement in group by
 				//  then join each value together to create a unique key.
-				keys := make([]string, orderCt)
+				keys := make([]value.Value, orderCt)
 				for i, col := range m.p.Stmt.OrderBy {
 					if col.Expr != nil {
 						if key, ok := vm.Eval(sdm, col.Expr); ok {
 							//u.Debugf("msgtype:%T  key:%q for-expr:%s", sdm, key, col.Expr)
-							keys[i] = key.ToString()
+							keys[i] = key
 						} else {
 							// Is this an error?
 							//u.Warnf("no key?  %s for %+v", col.Expr, sdm)
@@ -137,7 +139,7 @@ msgReadLoop:
 }
 
 type msgkey struct {
-	keys []string
+	keys []value.Value
 	msg  *datasource.SqlDriverMessageMap
 }
 type OrderMessages struct {
@@ -165,15 +167,18 @@ func (m *OrderMessages) Len() int {
 }
 func (m *OrderMessages) Less(i, j int) bool {
 	for ki, key := range m.l[i].keys {
-		if key < m.l[j].keys[ki] {
-			if m.invert[ki] {
-				return false
-			}
-			return true
+		var cmp int
+		nm, ok := key.(value.NumericValue)
+		if ok {
+			cmp = nm.Compare(m.l[j].keys[ki].(value.NumericValue))
 		} else {
-			if m.invert[ki] {
-				return true
-			}
+			cmp = strings.Compare(key.ToString(), m.l[j].keys[ki].ToString())
+		}
+
+		if cmp < 0 {
+			return !m.invert[ki]
+		} else {
+			return m.invert[ki]
 		}
 	}
 	return false

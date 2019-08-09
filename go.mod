@@ -1,11 +1,10 @@
-module github.com/paulgoleary/qlbridge
+module github.com/araddon/qlbridge
 
 go 1.12
 
 require (
 	github.com/araddon/dateparse v0.0.0-20190622164848-0fb0a474d195
 	github.com/araddon/gou v0.0.0-20190110011759-c797efecbb61
-	github.com/araddon/qlbridge v0.0.0-20190614144613-77bcb31a8923
 	github.com/dchest/siphash v1.2.1
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.1
